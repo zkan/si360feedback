@@ -7,6 +7,7 @@ from program import (
     FEEDBACK_REQUESTS_API_ENDPOINT,
     OAUTH_API_ENDPOINT,
     strip_markup_comment,
+    strip_p,
 )
 
 
@@ -15,6 +16,15 @@ def test_strip_markup_comment_should_remove_markup_comment():
 
     text = '<!--MARKUP_VERSION:v3--><p>5) Are we OK with him</p>'
     result = strip_markup_comment(text)
+
+    assert result == expected
+
+
+def test_strip_p_should_remove_p_tag():
+    expected = '5) Are we OK with him'
+
+    text = '<p>5) Are we OK with him</p>'
+    result = strip_p(text)
 
     assert result == expected
 

@@ -21,6 +21,10 @@ def strip_markup_comment(text):
     return text.replace(text_to_remove, '')
 
 
+def strip_p(text):
+    return text.replace('<p>', '').replace('</p>', '')
+
+
 def get_access_token(username, password, auth_basic_token):
     payload = {
         'grant_type': 'password',
@@ -65,7 +69,7 @@ if __name__ == '__main__':
             if question['type'] == 'Heading':
                 continue
 
-            print(strip_markup_comment(question['question']))
+            print(strip_p(strip_markup_comment(question['question'])))
             if question['type'] == 'LikertScale':
                 final_ratings = {}
                 for answer in question['answers']:
@@ -80,4 +84,4 @@ if __name__ == '__main__':
 
             elif question['type'] == 'Question':
                 for answer in question['answers']:
-                    print(answer['text'])
+                    print(strip_p(answer['text']))
