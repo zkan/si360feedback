@@ -1,0 +1,29 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.7.4
+    working_directory: ~/si360feedback
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "Pipfile.lock" }}
+      - run:
+          name: Install Dependencies
+          command: |
+            sudo pip install pipenv
+            export PIPENV_VENV_IN_PROJECT=~/si360feedback
+            pipenv install
+      - save_cache:
+          paths:
+            - ./.venv
+          key: v1-dependencies-{{ checksum "Pipfile.lock" }}
+      - run:
+          name: Run Static Analysis
+          command: |
+            pipenv run flake8
+      - run:
+          name: Run Tests
+          command: |
+            pipenv run pytest
