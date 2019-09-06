@@ -65,7 +65,7 @@ if __name__ == '__main__':
             if question['type'] == 'Heading':
                 continue
 
-            print(question['question'])
+            print(strip_markup_comment(question['question']))
             if question['type'] == 'LikertScale':
                 final_ratings = {}
                 for answer in question['answers']:
