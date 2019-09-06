@@ -14,7 +14,7 @@ jobs:
           command: |
             sudo pip install pipenv
             export PIPENV_VENV_IN_PROJECT=~/si360feedback
-            pipenv install
+            pipenv install --dev
       - save_cache:
           paths:
             - ./.venv
