@@ -26,14 +26,16 @@ def get_access_token(username, password, auth_basic_token):
         'Authorization': f'Basic {auth_basic_token}',
         'User-Agent': 'small_improvements_bot_app',
     }
-    r = requests.post(OAUTH_API_ENDPOINT, data=payload, headers=headers)
-    data = r.json()
+    response = requests.post(OAUTH_API_ENDPOINT, data=payload, headers=headers)
+    data = response.json()
 
     return data.get('access_token')
 
 
 def get_feedback_requests(headers):
-    requests.get(FEEDBACK_REQUESTS_API_ENDPOINT, headers=headers)
+    response = requests.get(FEEDBACK_REQUESTS_API_ENDPOINT, headers=headers)
+
+    return response.json()
 
 
 if __name__ == '__main__':
@@ -42,8 +44,7 @@ if __name__ == '__main__':
         'Authorization': f'Bearer {access_token}'
     }
 
-    r = requests.get(FEEDBACK_REQUESTS_API_ENDPOINT, headers=headers)
-    data = r.json()
+    data = get_feedback_requests(headers)
 
     for each in data:
         print(each['reviewee']['name'])

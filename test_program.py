@@ -63,3 +63,26 @@ def test_get_feedback_requests_data_should_call_correct_api_endpoint():
         get_feedback_requests(headers)
 
         mock_get.assert_called_once_with(FEEDBACK_REQUESTS_API_ENDPOINT, headers=headers)
+
+
+def test_get_feedback_requests_data_should_return_feedback_requests():
+    with ExitStack() as stack:
+        stack.enter_context(patch('program.get_access_token', return_value='access_token'))
+        mock_get = stack.enter_context(patch('program.requests.get'))
+        mock_get.return_value.json.return_value = expected = [
+            {
+                'id': 'w0s*gSmDalS6NsJDvrYpiA',
+                'reviewee': {
+                    'id': 'NEcSDCAXrbj0aNGKALH1mw',
+                    'name': 'Alif Ruksaithong',
+                }
+            }
+        ]
+
+        headers = {
+            'Authorization': f'Bearer access_token'
+        }
+
+        feedback_requests_data = get_feedback_requests(headers)
+
+        assert feedback_requests_data == expected
