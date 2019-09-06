@@ -15,6 +15,12 @@ FEEDBACK_REQUESTS_API_ENDPOINT = f'{BASE_API_URL}/v2/feedback-cycles/{CYCLE_ID}/
     f'feedback-requests?managerId={MANAGER_ID}'
 
 
+def strip_markup_comment(text):
+    text_to_remove = '<!--MARKUP_VERSION:v3-->'
+
+    return text.replace(text_to_remove, '')
+
+
 def get_access_token(username, password, auth_basic_token):
     payload = {
         'grant_type': 'password',
@@ -56,8 +62,11 @@ if __name__ == '__main__':
         data = r.json()
         questions_with_answers = data['questionsWithAnswers']
         for question in questions_with_answers:
+            if question['type'] == 'Heading':
+                continue
+
+            print(question['question'])
             if question['type'] == 'LikertScale':
-                print(question['question'])
                 final_ratings = {}
                 for answer in question['answers']:
                     for rating in question['ratings']:
@@ -70,6 +79,5 @@ if __name__ == '__main__':
                 print(final_ratings)
 
             elif question['type'] == 'Question':
-                print(question['question'])
                 for answer in question['answers']:
                     print(answer['text'])

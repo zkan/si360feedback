@@ -5,8 +5,18 @@ from program import (
     get_access_token,
     get_feedback_requests,
     FEEDBACK_REQUESTS_API_ENDPOINT,
-    OAUTH_API_ENDPOINT
+    OAUTH_API_ENDPOINT,
+    strip_markup_comment,
 )
+
+
+def test_strip_markup_comment_should_remove_markup_comment():
+    expected = '<p>5) Are we OK with him</p>'
+
+    text = '<!--MARKUP_VERSION:v3--><p>5) Are we OK with him</p>'
+    result = strip_markup_comment(text)
+
+    assert result == expected
 
 
 def test_get_access_token_should_call_correct_api_endpoint():
