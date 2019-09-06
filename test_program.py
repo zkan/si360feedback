@@ -2,11 +2,13 @@ from contextlib import ExitStack
 from unittest.mock import patch
 
 from program import (
+    BASE_API_URL,
+    CYCLE_ID,
     get_access_token,
     get_answers,
     get_feedback_requests,
-    FEEDBACK_REQUESTS_API_ENDPOINT,
-    OAUTH_API_ENDPOINT,
+    get_questions_with_answers,
+    MANAGER_ID,
     strip_markup_comment,
     strip_p,
 )
@@ -31,6 +33,8 @@ def test_strip_p_should_remove_p_tag():
 
 
 def test_get_access_token_should_call_correct_api_endpoint():
+    OAUTH_API_ENDPOINT = f'{BASE_API_URL}/oauth2/token/'
+
     username = 'kan@pronto.com'
     password = 'hellopronto'
     auth_basic_token = '12345'
@@ -73,7 +77,10 @@ def test_get_access_token_should_return_access_token():
         assert access_token == 'ACCESS_TOKEN'
 
 
-def test_get_feedback_requests_data_should_call_correct_api_endpoint():
+def test_get_feedback_requests_should_call_correct_api_endpoint():
+    FEEDBACK_REQUESTS_API_ENDPOINT = f'{BASE_API_URL}/v2/feedback-cycles/{CYCLE_ID}/' \
+        f'feedback-requests?managerId={MANAGER_ID}'
+
     with ExitStack() as stack:
         stack.enter_context(patch('program.get_access_token', return_value='access_token'))
         mock_get = stack.enter_context(patch('program.requests.get'))
@@ -86,7 +93,7 @@ def test_get_feedback_requests_data_should_call_correct_api_endpoint():
         mock_get.assert_called_once_with(FEEDBACK_REQUESTS_API_ENDPOINT, headers=headers)
 
 
-def test_get_feedback_requests_data_should_return_feedback_requests():
+def test_get_feedback_requests_should_return_feedback_requests():
     with ExitStack() as stack:
         stack.enter_context(patch('program.get_access_token', return_value='access_token'))
         mock_get = stack.enter_context(patch('program.requests.get'))
@@ -104,9 +111,53 @@ def test_get_feedback_requests_data_should_return_feedback_requests():
             'Authorization': f'Bearer access_token'
         }
 
-        feedback_requests_data = get_feedback_requests(headers)
+        feedback_requests = get_feedback_requests(headers)
 
-        assert feedback_requests_data == expected
+        assert feedback_requests == expected
+
+
+def test_get_questions_with_answers_should_call_correct_api_endpoint():
+    feedback_id = 'abc123'
+    FEEDBACK_DETAILS_API_ENDPOINT = f'{BASE_API_URL}/v2/unified-feedback/details/' \
+        f'{feedback_id}/'
+
+    with ExitStack() as stack:
+        mock_get = stack.enter_context(patch('program.requests.get'))
+        headers = {
+            'Authorization': f'Bearer access_token'
+        }
+        get_questions_with_answers(feedback_id, headers)
+
+        mock_get.assert_called_once_with(FEEDBACK_DETAILS_API_ENDPOINT, headers=headers)
+
+
+def test_get_questions_with_answers_should_return_questions_with_answers():
+    feedback_id = 'abc123'
+
+    with ExitStack() as stack:
+        mock_get = stack.enter_context(patch('program.requests.get'))
+        mock_get.return_value.json.return_value = expected = {
+            'questionsWithAnswers': [
+                {
+                    'type': 'Heading',
+                },
+                {
+                    'type': 'Question',
+                    'question': '<!--MARKUP_VERSION:v3--><p>2) Are there any issue?</p>',
+                    'answers': [
+                        {
+                            'text': '<p>I do not think he has any issue with the Pronto values.</p>'
+                        },
+                    ]
+                },
+            ]
+        }
+        headers = {
+            'Authorization': f'Bearer access_token'
+        }
+        results = get_questions_with_answers(feedback_id, headers)
+
+        assert results == expected['questionsWithAnswers']
 
 
 def test_get_answers_should_get_and_extract_answers_from_response():
