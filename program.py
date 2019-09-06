@@ -3,19 +3,24 @@ import os
 import requests
 
 
-AUTH_BASIC_TOKEN = os.environ.get('AUTH_BASIC_TOKEN')
 SI_USERNAME = os.environ.get('SI_USERNAME')
 SI_PASSWORD = os.environ.get('SI_PASSWORD')
+AUTH_BASIC_TOKEN = os.environ.get('AUTH_BASIC_TOKEN')
 BASE_API_URL = 'https://www.small-improvements.com/api'
-
 CYCLE_ID = 'YUG98Peo6q98yqU25sytlA'
 MANAGER_ID = 'DLwCz1IxRVSuFU6y565Psw'
-OAUTH_API_ENDPOINT = f'{BASE_API_URL}/oauth2/token/'
-FEEDBACK_REQUESTS_API_ENDPOINT = f'{BASE_API_URL}/v2/feedback-cycles/{CYCLE_ID}/' \
-    f'feedback-requests?managerId={MANAGER_ID}'
+
+
+def strip_markup_comment(text):
+    return text.replace('<!--MARKUP_VERSION:v3-->', '')
+
+
+def strip_p(text):
+    return text.replace('<p>', '').replace('</p>', '')
 
 
 def get_access_token(username, password, auth_basic_token):
+    OAUTH_API_ENDPOINT = f'{BASE_API_URL}/oauth2/token/'
     payload = {
         'grant_type': 'password',
         'username': username,
@@ -29,13 +34,51 @@ def get_access_token(username, password, auth_basic_token):
     response = requests.post(OAUTH_API_ENDPOINT, data=payload, headers=headers)
     data = response.json()
 
-    return data.get('access_token')
+    return data['access_token']
 
 
 def get_feedback_requests(headers):
+    FEEDBACK_REQUESTS_API_ENDPOINT = f'{BASE_API_URL}/v2/feedback-cycles/{CYCLE_ID}/' \
+        f'feedback-requests?managerId={MANAGER_ID}'
     response = requests.get(FEEDBACK_REQUESTS_API_ENDPOINT, headers=headers)
+    data = response.json()
 
-    return response.json()
+    return data
+
+
+def get_questions_with_answers(feedback_id, headers):
+    FEEDBACK_DETAILS_API_ENDPOINT = f'{BASE_API_URL}/v2/unified-feedback/details/' \
+        f'{feedback_id}/'
+    response = requests.get(FEEDBACK_DETAILS_API_ENDPOINT, headers=headers)
+    data = response.json()
+
+    return data['questionsWithAnswers']
+
+
+def get_answers(questions_with_answers):
+    results = []
+    for question in questions_with_answers:
+        if question['type'] == 'Heading':
+            continue
+
+        results.append(strip_p(strip_markup_comment(question['question'])))
+        if question['type'] == 'LikertScale':
+            final_ratings = {}
+            for answer in question['answers']:
+                for rating in question['ratings']:
+                    if rating['id'] == answer['ratingId']:
+                        try:
+                            final_ratings[rating['text']] += 1
+                        except KeyError:
+                            final_ratings[rating['text']] = 1
+
+            results.append(final_ratings)
+
+        elif question['type'] == 'Question':
+            for answer in question['answers']:
+                results.append(strip_p(answer['text']))
+
+    return results
 
 
 if __name__ == '__main__':
@@ -48,28 +91,8 @@ if __name__ == '__main__':
 
     for each in data:
         print(each['reviewee']['name'])
-
         feedback_id = each['id']
-        FEEDBACK_DETAILS_API_ENDPOINT = f'{BASE_API_URL}/v2/unified-feedback/details/' \
-            f'{feedback_id}/'
-        r = requests.get(FEEDBACK_DETAILS_API_ENDPOINT, headers=headers)
-        data = r.json()
-        questions_with_answers = data['questionsWithAnswers']
-        for question in questions_with_answers:
-            if question['type'] == 'LikertScale':
-                print(question['question'])
-                final_ratings = {}
-                for answer in question['answers']:
-                    for rating in question['ratings']:
-                        if rating['id'] == answer['ratingId']:
-                            try:
-                                final_ratings[rating['text']] += 1
-                            except KeyError:
-                                final_ratings[rating['text']] = 1
-
-                print(final_ratings)
-
-            elif question['type'] == 'Question':
-                print(question['question'])
-                for answer in question['answers']:
-                    print(answer['text'])
+        questions_with_answers = get_questions_with_answers(feedback_id, headers)
+        results = get_answers(questions_with_answers)
+        for result in results:
+            print(result)
