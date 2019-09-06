@@ -32,23 +32,23 @@ def get_access_token(username, password, auth_basic_token):
     return data.get('access_token')
 
 
+def get_feedback_requests(headers):
+    requests.get(FEEDBACK_REQUESTS_API_ENDPOINT, headers=headers)
+
+
 if __name__ == '__main__':
     access_token = get_access_token(SI_USERNAME, SI_PASSWORD, AUTH_BASIC_TOKEN)
-
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
+
     r = requests.get(FEEDBACK_REQUESTS_API_ENDPOINT, headers=headers)
     data = r.json()
 
     for each in data:
-        reviewee_name = each['reviewee']['name']
-        print(reviewee_name)
+        print(each['reviewee']['name'])
 
         feedback_id = each['id']
-        headers = {
-            'Authorization': f'Bearer {access_token}'
-        }
         FEEDBACK_DETAILS_API_ENDPOINT = f'{BASE_API_URL}/v2/unified-feedback/details/' \
             f'{feedback_id}/'
         r = requests.get(FEEDBACK_DETAILS_API_ENDPOINT, headers=headers)
