@@ -146,7 +146,7 @@ def test_get_questions_with_answers_should_return_questions_with_answers():
                     'question': '<!--MARKUP_VERSION:v3--><p>2) Are there any issue?</p>',
                     'answers': [
                         {
-                            'text': '<p>I do not think he has any issue with the Pronto values.</p>'
+                            'text': '<p>I do not think he has an issue.</p>'
                         },
                     ]
                 },
