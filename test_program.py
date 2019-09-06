@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 from program import (
     get_access_token,
+    get_answers,
     get_feedback_requests,
     FEEDBACK_REQUESTS_API_ENDPOINT,
     OAUTH_API_ENDPOINT,
@@ -106,3 +107,67 @@ def test_get_feedback_requests_data_should_return_feedback_requests():
         feedback_requests_data = get_feedback_requests(headers)
 
         assert feedback_requests_data == expected
+
+
+def test_get_answers_should_get_and_extract_answers_from_response():
+    expected = [
+        '1) This Neutron is a good team member',
+        {'3': 2, '4': 1},
+        '2) Are there any issue?',
+        'I do not think he has any issue with the Pronto values.',
+        'He is a quiet guy.'
+    ]
+
+    questions_with_answers = [
+        {
+            'type': 'Heading',
+        },
+        {
+            'type': 'LikertScale',
+            'question': '<!--MARKUP_VERSION:v3--><p>1) This Neutron is a good team member</p>',
+            'ratings': [
+                {
+                    'id': 'b10t1f',
+                    'text': '4'
+                },
+                {
+                    'id': 'i6pqp',
+                    'text': '3'
+                },
+                {
+                    'id': 'l1e67',
+                    'text': '2'
+                },
+                {
+                    'id': 'u1t0hg',
+                    'text': '1'
+                }
+            ],
+            'answers': [
+                {
+                    'ratingId': 'i6pqp'
+                },
+                {
+                    'ratingId': 'i6pqp'
+                },
+                {
+                    'ratingId': 'b10t1f'
+                },
+            ]
+        },
+        {
+            'type': 'Question',
+            'question': '<!--MARKUP_VERSION:v3--><p>2) Are there any issue?</p>',
+            'answers': [
+                {
+                    'text': '<p>I do not think he has any issue with the Pronto values.</p>'
+                },
+                {
+                    'text': '<p>He is a quiet guy.</p>'
+                },
+            ]
+        },
+    ]
+    results = get_answers(questions_with_answers)
+
+    assert results == expected

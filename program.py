@@ -48,6 +48,32 @@ def get_feedback_requests(headers):
     return response.json()
 
 
+def get_answers(questions_with_answers):
+    results = []
+    for question in questions_with_answers:
+        if question['type'] == 'Heading':
+            continue
+
+        results.append(strip_p(strip_markup_comment(question['question'])))
+        if question['type'] == 'LikertScale':
+            final_ratings = {}
+            for answer in question['answers']:
+                for rating in question['ratings']:
+                    if rating['id'] == answer['ratingId']:
+                        try:
+                            final_ratings[rating['text']] += 1
+                        except KeyError:
+                            final_ratings[rating['text']] = 1
+
+            results.append(final_ratings)
+
+        elif question['type'] == 'Question':
+            for answer in question['answers']:
+                results.append(strip_p(answer['text']))
+
+    return results
+
+
 if __name__ == '__main__':
     access_token = get_access_token(SI_USERNAME, SI_PASSWORD, AUTH_BASIC_TOKEN)
     headers = {
@@ -65,23 +91,7 @@ if __name__ == '__main__':
         r = requests.get(FEEDBACK_DETAILS_API_ENDPOINT, headers=headers)
         data = r.json()
         questions_with_answers = data['questionsWithAnswers']
-        for question in questions_with_answers:
-            if question['type'] == 'Heading':
-                continue
+        results = get_answers(questions_with_answers)
 
-            print(strip_p(strip_markup_comment(question['question'])))
-            if question['type'] == 'LikertScale':
-                final_ratings = {}
-                for answer in question['answers']:
-                    for rating in question['ratings']:
-                        if rating['id'] == answer['ratingId']:
-                            try:
-                                final_ratings[rating['text']] += 1
-                            except KeyError:
-                                final_ratings[rating['text']] = 1
-
-                print(final_ratings)
-
-            elif question['type'] == 'Question':
-                for answer in question['answers']:
-                    print(strip_p(answer['text']))
+        for result in results:
+            print(result)
