@@ -9,6 +9,7 @@ AUTH_BASIC_TOKEN = os.environ.get('AUTH_BASIC_TOKEN')
 BASE_API_URL = 'https://www.small-improvements.com/api'
 CYCLE_ID = 'YUG98Peo6q98yqU25sytlA'
 MANAGER_ID = 'DLwCz1IxRVSuFU6y565Psw'
+REVIEW_ID = 'aUme0DmBwRht6T8iubT4gw'
 
 
 def strip_markup_comment(text):
@@ -119,8 +120,7 @@ if __name__ == '__main__':
 
     print('-' * 10)
 
-    review_id = 'aUme0DmBwRht6T8iubT4gw'
-    reviewee = get_assessment(review_id, headers)
+    reviewee = get_assessment(REVIEW_ID, headers)
 
     print('Self-Review')
     results = get_self_review(reviewee)
