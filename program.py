@@ -89,6 +89,18 @@ def get_assessment(review_id, headers):
     return data[0]
 
 
+def get_self_review(reviewee):
+    results = []
+    for answer in reviewee['answers']:
+        if answer['type'] == 'TEXT':
+            description = answer['questionPayload']['description']
+            results.append(strip_p(strip_markup_comment((description))))
+            if 'text' in answer['answerPayload']:
+                results.append(strip_markup_comment((answer['answerPayload']['text'])))
+
+    return results
+
+
 if __name__ == '__main__':
     access_token = get_access_token(SI_USERNAME, SI_PASSWORD, AUTH_BASIC_TOKEN)
     headers = {
@@ -109,3 +121,8 @@ if __name__ == '__main__':
 
     review_id = 'aUme0DmBwRht6T8iubT4gw'
     reviewee = get_assessment(review_id, headers)
+
+    print('Self-Review')
+    results = get_self_review(reviewee)
+    for result in results:
+        print(result)

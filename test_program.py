@@ -9,6 +9,7 @@ from program import (
     get_assessment,
     get_feedback_requests,
     get_questions_with_answers,
+    get_self_review,
     MANAGER_ID,
     strip_markup_comment,
     strip_p,
@@ -260,3 +261,34 @@ def test_get_assessment_should_return_self_assessment():
         feedback_requests = get_assessment(review_id, headers)
 
         assert feedback_requests == expected[0]
+
+
+def test_get_self_review_data_from_assessment_should_return_self_review_data():
+    expected = [
+        'Are there any unclear part?',
+        '<p>Everything is clear.</p>',
+        'Which values do you excel at?',
+    ]
+    reviewee = {
+        'answers': [
+            {
+                'type': 'TEXT',
+                'answerPayload': {
+                    'text': '<!--MARKUP_VERSION:v3--><p>Everything is clear.</p>'
+                },
+                'questionPayload': {
+                    'description': '<!--MARKUP_VERSION:v3--><p>Are there any unclear part?</p>',
+                }
+            },
+            {
+                'type': 'TEXT',
+                'answerPayload': {},
+                'questionPayload': {
+                    'description': '<!--MARKUP_VERSION:v3--><p>Which values do you excel at?</p>',
+                }
+            },
+        ]
+    }
+    results = get_self_review(reviewee)
+
+    assert results == expected
