@@ -6,6 +6,7 @@ from program import (
     CYCLE_ID,
     get_access_token,
     get_answers,
+    get_assessment,
     get_feedback_requests,
     get_questions_with_answers,
     MANAGER_ID,
@@ -82,12 +83,10 @@ def test_get_feedback_requests_should_call_correct_api_endpoint():
         f'feedback-requests?managerId={MANAGER_ID}'
 
     with ExitStack() as stack:
-        stack.enter_context(patch('program.get_access_token', return_value='access_token'))
         mock_get = stack.enter_context(patch('program.requests.get'))
         headers = {
             'Authorization': f'Bearer access_token'
         }
-
         get_feedback_requests(headers)
 
         mock_get.assert_called_once_with(FEEDBACK_REQUESTS_API_ENDPOINT, headers=headers)
@@ -95,7 +94,6 @@ def test_get_feedback_requests_should_call_correct_api_endpoint():
 
 def test_get_feedback_requests_should_return_feedback_requests():
     with ExitStack() as stack:
-        stack.enter_context(patch('program.get_access_token', return_value='access_token'))
         mock_get = stack.enter_context(patch('program.requests.get'))
         mock_get.return_value.json.return_value = expected = [
             {
@@ -106,11 +104,9 @@ def test_get_feedback_requests_should_return_feedback_requests():
                 }
             }
         ]
-
         headers = {
             'Authorization': f'Bearer access_token'
         }
-
         feedback_requests = get_feedback_requests(headers)
 
         assert feedback_requests == expected
@@ -222,3 +218,45 @@ def test_get_answers_should_get_and_extract_answers_from_response():
     results = get_answers(questions_with_answers)
 
     assert results == expected
+
+
+def test_get_assessment_should_call_correct_api_endpoint():
+    review_id = 'abc'
+    ASSESSMENT_API_ENDPOINT = f'{BASE_API_URL}/v2/assessment?reviewId={review_id}'
+
+    with ExitStack() as stack:
+        stack.enter_context(patch('program.get_assessment'))
+        mock_get = stack.enter_context(patch('program.requests.get'))
+        headers = {
+            'Authorization': f'Bearer access_token'
+        }
+        get_assessment(review_id, headers)
+
+        mock_get.assert_called_once_with(ASSESSMENT_API_ENDPOINT, headers=headers)
+
+
+def test_get_assessment_should_return_self_assessment():
+    review_id = 'abc'
+
+    with ExitStack() as stack:
+        mock_get = stack.enter_context(patch('program.requests.get'))
+        mock_get.return_value.json.return_value = expected = [
+            {
+                'id': 'aUme0DmBwRht6T8iubT4gw:self-assessment',
+                'author': {
+                    'name': 'A Test',
+                }
+            },
+            {
+                'id': 'aUme0DmBwRht6T8iubT4gw:self-assessment',
+                'author': {
+                    'name': 'B Test',
+                }
+            }
+        ]
+        headers = {
+            'Authorization': f'Bearer access_token'
+        }
+        feedback_requests = get_assessment(review_id, headers)
+
+        assert feedback_requests == expected[0]

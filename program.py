@@ -81,6 +81,14 @@ def get_answers(questions_with_answers):
     return results
 
 
+def get_assessment(review_id, headers):
+    ASSESSMENT_API_ENDPOINT = f'{BASE_API_URL}/v2/assessment?reviewId={review_id}'
+    response = requests.get(ASSESSMENT_API_ENDPOINT, headers=headers)
+    data = response.json()
+
+    return data[0]
+
+
 if __name__ == '__main__':
     access_token = get_access_token(SI_USERNAME, SI_PASSWORD, AUTH_BASIC_TOKEN)
     headers = {
@@ -96,3 +104,8 @@ if __name__ == '__main__':
         results = get_answers(questions_with_answers)
         for result in results:
             print(result)
+
+    print('-' * 10)
+
+    review_id = 'aUme0DmBwRht6T8iubT4gw'
+    reviewee = get_assessment(review_id, headers)
