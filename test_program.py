@@ -162,11 +162,11 @@ def test_get_questions_with_answers_should_return_questions_with_answers():
 
 def test_get_answers_should_get_and_extract_answers_from_response():
     expected = [
-        '1) This Neutron is a good team member',
+        '1) This Neutron is a good team member.',
         {'3': 2, '4': 1},
         '2) Are there any issue?',
-        'I do not think he has any issue with the Pronto values.',
-        'He is a quiet guy.'
+        '<p>I do not think he has any issue with the Pronto values.</p>',
+        '<p>He is a quiet guy.</p>'
     ]
 
     questions_with_answers = [
@@ -175,7 +175,7 @@ def test_get_answers_should_get_and_extract_answers_from_response():
         },
         {
             'type': 'LikertScale',
-            'question': '<!--MARKUP_VERSION:v3--><p>1) This Neutron is a good team member</p>',
+            'question': '<!--MARKUP_VERSION:v3--><p>1) This Neutron is a good team member.</p>',
             'ratings': [
                 {
                     'id': 'b10t1f',

@@ -76,7 +76,7 @@ def get_answers(questions_with_answers):
 
         elif question['type'] == 'Question':
             for answer in question['answers']:
-                results.append(strip_p(answer['text']))
+                results.append(answer['text'])
 
     return results
 
