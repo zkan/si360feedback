@@ -6,8 +6,10 @@ from program import (
     CYCLE_ID,
     get_access_token,
     get_answers,
+    get_assessment,
     get_feedback_requests,
     get_questions_with_answers,
+    get_self_review,
     MANAGER_ID,
     strip_markup_comment,
     strip_p,
@@ -82,12 +84,10 @@ def test_get_feedback_requests_should_call_correct_api_endpoint():
         f'feedback-requests?managerId={MANAGER_ID}'
 
     with ExitStack() as stack:
-        stack.enter_context(patch('program.get_access_token', return_value='access_token'))
         mock_get = stack.enter_context(patch('program.requests.get'))
         headers = {
             'Authorization': f'Bearer access_token'
         }
-
         get_feedback_requests(headers)
 
         mock_get.assert_called_once_with(FEEDBACK_REQUESTS_API_ENDPOINT, headers=headers)
@@ -95,7 +95,6 @@ def test_get_feedback_requests_should_call_correct_api_endpoint():
 
 def test_get_feedback_requests_should_return_feedback_requests():
     with ExitStack() as stack:
-        stack.enter_context(patch('program.get_access_token', return_value='access_token'))
         mock_get = stack.enter_context(patch('program.requests.get'))
         mock_get.return_value.json.return_value = expected = [
             {
@@ -106,11 +105,9 @@ def test_get_feedback_requests_should_return_feedback_requests():
                 }
             }
         ]
-
         headers = {
             'Authorization': f'Bearer access_token'
         }
-
         feedback_requests = get_feedback_requests(headers)
 
         assert feedback_requests == expected
@@ -162,11 +159,11 @@ def test_get_questions_with_answers_should_return_questions_with_answers():
 
 def test_get_answers_should_get_and_extract_answers_from_response():
     expected = [
-        '1) This Neutron is a good team member',
+        '1) This Neutron is a good team member.',
         {'3': 2, '4': 1},
         '2) Are there any issue?',
-        'I do not think he has any issue with the Pronto values.',
-        'He is a quiet guy.'
+        '<p>I do not think he has any issue with the Pronto values.</p>',
+        '<p>He is a quiet guy.</p>'
     ]
 
     questions_with_answers = [
@@ -175,7 +172,7 @@ def test_get_answers_should_get_and_extract_answers_from_response():
         },
         {
             'type': 'LikertScale',
-            'question': '<!--MARKUP_VERSION:v3--><p>1) This Neutron is a good team member</p>',
+            'question': '<!--MARKUP_VERSION:v3--><p>1) This Neutron is a good team member.</p>',
             'ratings': [
                 {
                     'id': 'b10t1f',
@@ -220,5 +217,78 @@ def test_get_answers_should_get_and_extract_answers_from_response():
         },
     ]
     results = get_answers(questions_with_answers)
+
+    assert results == expected
+
+
+def test_get_assessment_should_call_correct_api_endpoint():
+    review_id = 'abc'
+    ASSESSMENT_API_ENDPOINT = f'{BASE_API_URL}/v2/assessment?reviewId={review_id}'
+
+    with ExitStack() as stack:
+        stack.enter_context(patch('program.get_assessment'))
+        mock_get = stack.enter_context(patch('program.requests.get'))
+        headers = {
+            'Authorization': f'Bearer access_token'
+        }
+        get_assessment(review_id, headers)
+
+        mock_get.assert_called_once_with(ASSESSMENT_API_ENDPOINT, headers=headers)
+
+
+def test_get_assessment_should_return_self_assessment():
+    review_id = 'abc'
+
+    with ExitStack() as stack:
+        mock_get = stack.enter_context(patch('program.requests.get'))
+        mock_get.return_value.json.return_value = expected = [
+            {
+                'id': 'aUme0DmBwRht6T8iubT4gw:self-assessment',
+                'author': {
+                    'name': 'A Test',
+                }
+            },
+            {
+                'id': 'aUme0DmBwRht6T8iubT4gw:self-assessment',
+                'author': {
+                    'name': 'B Test',
+                }
+            }
+        ]
+        headers = {
+            'Authorization': f'Bearer access_token'
+        }
+        feedback_requests = get_assessment(review_id, headers)
+
+        assert feedback_requests == expected[0]
+
+
+def test_get_self_review_data_from_assessment_should_return_self_review_data():
+    expected = [
+        'Are there any unclear part?',
+        '<p>Everything is clear.</p>',
+        'Which values do you excel at?',
+    ]
+    reviewee = {
+        'answers': [
+            {
+                'type': 'TEXT',
+                'answerPayload': {
+                    'text': '<!--MARKUP_VERSION:v3--><p>Everything is clear.</p>'
+                },
+                'questionPayload': {
+                    'description': '<!--MARKUP_VERSION:v3--><p>Are there any unclear part?</p>',
+                }
+            },
+            {
+                'type': 'TEXT',
+                'answerPayload': {},
+                'questionPayload': {
+                    'description': '<!--MARKUP_VERSION:v3--><p>Which values do you excel at?</p>',
+                }
+            },
+        ]
+    }
+    results = get_self_review(reviewee)
 
     assert results == expected

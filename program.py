@@ -9,6 +9,7 @@ AUTH_BASIC_TOKEN = os.environ.get('AUTH_BASIC_TOKEN')
 BASE_API_URL = 'https://www.small-improvements.com/api'
 CYCLE_ID = 'YUG98Peo6q98yqU25sytlA'
 MANAGER_ID = 'DLwCz1IxRVSuFU6y565Psw'
+REVIEW_ID = 'aUme0DmBwRht6T8iubT4gw'
 
 
 def strip_markup_comment(text):
@@ -76,7 +77,27 @@ def get_answers(questions_with_answers):
 
         elif question['type'] == 'Question':
             for answer in question['answers']:
-                results.append(strip_p(answer['text']))
+                results.append(answer['text'])
+
+    return results
+
+
+def get_assessment(review_id, headers):
+    ASSESSMENT_API_ENDPOINT = f'{BASE_API_URL}/v2/assessment?reviewId={review_id}'
+    response = requests.get(ASSESSMENT_API_ENDPOINT, headers=headers)
+    data = response.json()
+
+    return data[0]
+
+
+def get_self_review(reviewee):
+    results = []
+    for answer in reviewee['answers']:
+        if answer['type'] == 'TEXT':
+            description = answer['questionPayload']['description']
+            results.append(strip_p(strip_markup_comment((description))))
+            if 'text' in answer['answerPayload']:
+                results.append(strip_markup_comment((answer['answerPayload']['text'])))
 
     return results
 
@@ -96,3 +117,12 @@ if __name__ == '__main__':
         results = get_answers(questions_with_answers)
         for result in results:
             print(result)
+
+    print('-' * 10)
+
+    reviewee = get_assessment(REVIEW_ID, headers)
+
+    print('Self-Review')
+    results = get_self_review(reviewee)
+    for result in results:
+        print(result)
