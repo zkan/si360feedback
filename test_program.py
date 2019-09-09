@@ -159,9 +159,9 @@ def test_get_questions_with_answers_should_return_questions_with_answers():
 
 def test_get_answers_should_get_and_extract_answers_from_response():
     expected = [
-        '1) This Neutron is a good team member.',
+        '<h3>1) This Neutron is a good team member.</h3>',
         {'3': 2, '4': 1},
-        '2) Are there any issue?',
+        '<h3>2) Are there any issue?</h3>',
         '<p>I do not think he has any issue with the Pronto values.</p>',
         '<p>He is a quiet guy.</p>'
     ]
@@ -265,9 +265,9 @@ def test_get_assessment_should_return_self_assessment():
 
 def test_get_self_review_data_from_assessment_should_return_self_review_data():
     expected = [
-        'Are there any unclear part?',
+        '<h3>Are there any unclear part?</h3>',
         '<p>Everything is clear.</p>',
-        'Which values do you excel at?',
+        '<h3>Which values do you excel at?</h3>',
     ]
     reviewee = {
         'answers': [

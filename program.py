@@ -62,7 +62,8 @@ def get_answers(questions_with_answers):
         if question['type'] == 'Heading':
             continue
 
-        results.append(strip_p(strip_markup_comment(question['question'])))
+        html = f'<h3>{strip_p(strip_markup_comment(question["question"]))}</h3>'
+        results.append(html)
         if question['type'] == 'LikertScale':
             final_ratings = {}
             for answer in question['answers']:
@@ -95,7 +96,8 @@ def get_self_review(reviewee):
     for answer in reviewee['answers']:
         if answer['type'] == 'TEXT':
             description = answer['questionPayload']['description']
-            results.append(strip_p(strip_markup_comment((description))))
+            html = f'<h3>{strip_p(strip_markup_comment((description)))}</h3>'
+            results.append(html)
             if 'text' in answer['answerPayload']:
                 results.append(strip_markup_comment((answer['answerPayload']['text'])))
 
@@ -103,6 +105,15 @@ def get_self_review(reviewee):
 
 
 if __name__ == '__main__':
+    html = '''
+<html>
+<head>
+  <title>Small Improvements - 360 Feedback</title>
+</head>
+<body>
+'''
+    print(html)
+
     access_token = get_access_token(SI_USERNAME, SI_PASSWORD, AUTH_BASIC_TOKEN)
     headers = {
         'Authorization': f'Bearer {access_token}'
@@ -111,18 +122,27 @@ if __name__ == '__main__':
     data = get_feedback_requests(headers)
 
     for each in data:
-        print(each['reviewee']['name'])
+        html = f'<h1>{each["reviewee"]["name"]}</h1>'
+        print(html)
         feedback_id = each['id']
         questions_with_answers = get_questions_with_answers(feedback_id, headers)
         results = get_answers(questions_with_answers)
         for result in results:
             print(result)
 
-    print('-' * 10)
+    html = '<hr />'
+    print(html)
 
     reviewee = get_assessment(REVIEW_ID, headers)
 
-    print('Self-Review')
+    html = '<h2>Self-Review</h2>'
+    print(html)
     results = get_self_review(reviewee)
     for result in results:
         print(result)
+
+    html = '''
+</body>
+</html>
+'''
+    print(html)
