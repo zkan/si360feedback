@@ -6,16 +6,21 @@
 
 ## Installation
 
-```sh
-pipenv install
-```
-
-**Note:** See `env.example` file and put your credentials.
+1. Install the package manager for macOS `brew` from [Homebrew](https://brew.sh/) first.
+1. Install `pipenv`, run
+    ```sh
+    brew install pipenv
+    ```
+1. Install the dependencies used in this project, run
+    ```sh
+    pipenv install
+    ```
+1. Copy `env.example` to `.env` and put your credentials.
 
 ## Usage Example
 
 ```sh
-pipenv run python program.py
+pipenv run python program.py > your_reviewee.html
 ```
 
 ## Development Setup
