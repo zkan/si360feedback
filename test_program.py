@@ -10,6 +10,7 @@ from program import (
     get_feedback_requests,
     get_questions_with_answers,
     get_self_review,
+    get_ratings_in_percentage_in_html,
     MANAGER_ID,
     strip_markup_comment,
     strip_p,
@@ -160,7 +161,7 @@ def test_get_questions_with_answers_should_return_questions_with_answers():
 def test_get_answers_should_get_and_extract_answers_from_response():
     expected = [
         '<h3>1) This Neutron is a good team member.</h3>',
-        {'3': 2, '4': 1},
+        '<ul><li>3: 66.67%</li><li>4: 33.33%</li></ul>',
         '<h3>2) Are there any issue?</h3>',
         '<p>I do not think he has any issue with the Pronto values.</p>',
         '<p>He is a quiet guy.</p>'
@@ -290,5 +291,18 @@ def test_get_self_review_data_from_assessment_should_return_self_review_data():
         ]
     }
     results = get_self_review(reviewee)
+
+    assert results == expected
+
+
+def test_get_ratings_in_percentage_in_html_should_return_ratings_with_percentage_in_html():
+    expected = '<ul><li>4: 44.44%</li><li>3: 44.44%</li><li>2: 11.11%</li></ul>'
+
+    ratings = {
+        '4': 4,
+        '3': 4,
+        '2': 1
+    }
+    results = get_ratings_in_percentage_in_html(ratings)
 
     assert results == expected

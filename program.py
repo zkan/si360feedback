@@ -74,7 +74,7 @@ def get_answers(questions_with_answers):
                         except KeyError:
                             final_ratings[rating['text']] = 1
 
-            results.append(final_ratings)
+            results.append(get_ratings_in_percentage_in_html(final_ratings))
 
         elif question['type'] == 'Question':
             for answer in question['answers']:
@@ -100,6 +100,17 @@ def get_self_review(reviewee):
             results.append(html)
             if 'text' in answer['answerPayload']:
                 results.append(strip_markup_comment((answer['answerPayload']['text'])))
+
+    return results
+
+
+def get_ratings_in_percentage_in_html(ratings):
+    results = '<ul>'
+    total = sum(ratings.values())
+    for each in ratings:
+        results += f'<li>{each}: {ratings[each] / total * 100:.2f}%</li>'
+
+    results += '</ul>'
 
     return results
 
