@@ -6,6 +6,20 @@
 
 ## Installation
 
+### Using `venv`
+
+1. Create a virtual environemtn, run
+    ```sh
+    python3 -m venv ENV
+    ```
+1. Install the dependencies used in this project, run
+    ```sh
+    ENV/bin/pip install -r requirements.txt
+    ```
+1. Copy `env.example` to `.env` and put your credentials.
+
+### Using `pipenv`
+
 1. Install the package manager for macOS `brew` from [Homebrew](https://brew.sh/) first.
 1. Install `pipenv`, run
     ```sh
@@ -19,11 +33,35 @@
 
 ## Usage Example
 
+### Using `venv`
+
+```sh
+ENV/bin/python program.py > your_reviewee.html
+```
+
+### Using `pipenv`
+
 ```sh
 pipenv run python program.py > your_reviewee.html
 ```
 
+**Note:** To generate output in `requirements.txt`, run
+```sh
+pipenv lock --requirements > requirements.txt
+```
+
 ## Development Setup
+
+### Using `venv`
+
+```sh
+pipenv lock --dev --requirements > requirements-dev.txt
+ENV/bin/pip install requirements-dev.txt
+ENV/bin/flake8
+ENV/bin/pytest
+```
+
+### Using `pipenv`
 
 ```sh
 pipenv install --dev
