@@ -21,7 +21,7 @@ def strip_p(text):
 
 
 def get_access_token(username, password, auth_basic_token):
-    OAUTH_API_ENDPOINT = f'{BASE_API_URL}/oauth2/token/'
+    oauth_api_endpoint = f'{BASE_API_URL}/oauth2/token/'
     payload = {
         'grant_type': 'password',
         'username': username,
@@ -32,25 +32,25 @@ def get_access_token(username, password, auth_basic_token):
         'Authorization': f'Basic {auth_basic_token}',
         'User-Agent': 'small_improvements_bot_app',
     }
-    response = requests.post(OAUTH_API_ENDPOINT, data=payload, headers=headers)
+    response = requests.post(oauth_api_endpoint, data=payload, headers=headers)
     data = response.json()
 
     return data['access_token']
 
 
 def get_feedback_requests(headers):
-    FEEDBACK_REQUESTS_API_ENDPOINT = f'{BASE_API_URL}/v2/feedback-cycles/{CYCLE_ID}/' \
+    feedback_requests_api_endpoint = f'{BASE_API_URL}/v2/feedback-cycles/{CYCLE_ID}/' \
         f'feedback-requests?managerId={MANAGER_ID}'
-    response = requests.get(FEEDBACK_REQUESTS_API_ENDPOINT, headers=headers)
+    response = requests.get(feedback_requests_api_endpoint, headers=headers)
     data = response.json()
 
     return data
 
 
 def get_questions_with_answers(feedback_id, headers):
-    FEEDBACK_DETAILS_API_ENDPOINT = f'{BASE_API_URL}/v2/unified-feedback/details/' \
+    feedback_details_api_endpoint = f'{BASE_API_URL}/v2/unified-feedback/details/' \
         f'{feedback_id}/'
-    response = requests.get(FEEDBACK_DETAILS_API_ENDPOINT, headers=headers)
+    response = requests.get(feedback_details_api_endpoint, headers=headers)
     data = response.json()
 
     return data['questionsWithAnswers']
@@ -84,8 +84,8 @@ def get_answers(questions_with_answers):
 
 
 def get_assessment(review_id, headers):
-    ASSESSMENT_API_ENDPOINT = f'{BASE_API_URL}/v2/assessment?reviewId={review_id}'
-    response = requests.get(ASSESSMENT_API_ENDPOINT, headers=headers)
+    assessment_api_endpoint = f'{BASE_API_URL}/v2/assessment?reviewId={review_id}'
+    response = requests.get(assessment_api_endpoint, headers=headers)
     data = response.json()
 
     return data[0]
